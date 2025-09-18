@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/services.dart';
 import 'package:google_mlkit_object_detection/google_mlkit_object_detection.dart';
 import 'package:path_provider/path_provider.dart';
@@ -6,37 +7,44 @@ import '../../domain/entity/DetectedLabel.dart';
 
 class MlkitObjectDetectionDatasource {
   late final ObjectDetector _objectDetector;
-
-  MlkitObjectDetectionDatasource() {
-  }
+  late final List<String> _labels;
 
   Future<void> init() async {
-    final modelPath = await getModelPath('assets/models/ssd_mobilenet_v2_fpnlite.tflite');
-    print("load xong");
+    final modelPath = await _getModelPath('assets/models/detect.tflite');
+
+    // load label map
+    final labelData = await rootBundle.loadString('assets/models/labelmap.txt');
+    _labels = labelData.split('\n').where((e) => e.isNotEmpty).toList();
+
     _objectDetector = ObjectDetector(
-      options: LocalObjectDetectorOptions(
+        options: LocalObjectDetectorOptions(
         mode: DetectionMode.single,
-        modelPath: modelPath,
+        modelPath: modelPath, // Cập nhật đường dẫn
         classifyObjects: true,
         multipleObjects: true,
         maximumLabelsPerObject: 5,
         confidenceThreshold: 0.5,
-      ),
-    );
+    ),);
+
+    debugPrint("✅ ML Kit Object Detector initialized");
   }
 
-  Future<List<DetectedLabel>> detectObjects(File imagePath) async {
-    final inputImage = InputImage.fromFile(imagePath);
+  Future<List<DetectedLabel>> detectObjects(File imageFile) async {
+    final inputImage = InputImage.fromFile(imageFile);
     final objects = await _objectDetector.processImage(inputImage);
-    print("Detected ${objects.length} objects: $objects");
+
     final results = <DetectedLabel>[];
 
     for (final obj in objects) {
-      print("Object: BoundingBox=${obj.boundingBox}, Labels=${obj.labels}, TrackingID=${obj.trackingId}");
       for (final label in obj.labels) {
+        // lấy index từ model -> ánh xạ sang nhãn trong labelmap.txt
+        final labelName = (label.index != null && label.index! < _labels.length)
+            ? _labels[label.index!]
+            : "unknown";
+
         results.add(
           DetectedLabel(
-            label: label.text,
+            label: labelName,
             confidence: label.confidence,
           ),
         );
@@ -47,25 +55,24 @@ class MlkitObjectDetectionDatasource {
   }
 
   Future<void> close() async {
-    _objectDetector.close();
+    await _objectDetector.close();
   }
 
-  Future<String> getModelPath(String assetPath) async {
+  Future<String> _getModelPath(String assetPath) async {
     final appDir = await getApplicationDocumentsDirectory();
-    final modelFile = File('${appDir.path}/$assetPath');
+    final modelFile = File('${appDir.path}/${assetPath.split('/').last}');
 
     if (!await modelFile.exists()) {
-      // ensure subdir
-      await modelFile.parent.create(recursive: true);
+      await modelFile.create(recursive: true);
       final byteData = await rootBundle.load(assetPath);
       await modelFile.writeAsBytes(
         byteData.buffer.asUint8List(
           byteData.offsetInBytes,
           byteData.lengthInBytes,
         ),
-        flush: true,
       );
     }
     return modelFile.path;
   }
 }
+

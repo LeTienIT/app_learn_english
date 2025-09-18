@@ -11,14 +11,17 @@ class ObjectDetectionBloc extends Bloc<ObjectDetectionEvent, ObjectDetectionStat
     on<DetectObjectsEvent>(_onDetectObjects);
   }
 
-  Future<void> _onDetectObjects(DetectObjectsEvent event, Emitter<ObjectDetectionState> emit) async {
+  Future<void> _onDetectObjects(
+      DetectObjectsEvent event,
+      Emitter<ObjectDetectionState> emit,
+      ) async {
     emit(ObjectDetectionLoading());
     try {
-      final List<DetectedLabel> results = await detectObjectsUseCase(event.imagePath);
+      final List<DetectedLabel> results =
+      await detectObjectsUseCase(event.imagePath);
 
-      final labels = results.map((e) => e.label).toList();
-
-      emit(ObjectDetectionSuccess(labels));
+      // không cần map sang string nữa
+      emit(ObjectDetectionSuccess(results));
     } catch (e) {
       emit(ObjectDetectionFailure(e.toString()));
     }

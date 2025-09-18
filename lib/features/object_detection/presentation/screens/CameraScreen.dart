@@ -3,8 +3,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:image_cropper/image_cropper.dart';
+import 'package:learn_english/features/object_detection/presentation/bloc/image_translation_bloc.dart';
+import 'package:learn_english/features/object_detection/presentation/bloc/image_translation_state.dart';
 import 'package:learn_english/features/object_detection/presentation/bloc/object_detection_event.dart';
 
+import '../bloc/image_translation_event.dart';
 import '../bloc/object_detection_bloc.dart';
 import '../bloc/object_detection_state.dart';
 
@@ -60,7 +63,7 @@ class _ObjectDetectionPageState extends State<ObjectDetectionPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text("Object Detection Demo")),
+      appBar: AppBar(title: const Text("Nhận diên & dịch"),centerTitle: true,),
       body: SingleChildScrollView(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -78,59 +81,169 @@ class _ObjectDetectionPageState extends State<ObjectDetectionPage> {
               label: const Text("Chụp ảnh"),
             ),
 
+            SizedBox(height: 10,),
             Divider(height: 1,),
             SizedBox(height: 10,),
 
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            Wrap(
+              alignment: WrapAlignment.center,
+              spacing: 10,
               children: [
                 ElevatedButton(
                     onPressed: (){
-                      context.read<ObjectDetectionBloc>().add(DetectObjectsEvent(_imageFile!));
+                      // context.read<ObjectDetectionBloc>().add(DetectObjectsEvent(_imageFile!));
+                      showDialog(
+                          context: context,
+                          builder: (BuildContext context){
+                            return AlertDialog(
+                              title: const Text("Thông báo"),
+                              content: const Text("Tính năng đang trong quá trình phát triển!"),
+                              actions: [
+                                TextButton(
+                                  onPressed: (){
+                                    Navigator.of(context).pop();
+                                  }, 
+                                  child: const Text('Đóng')
+                                )
+                              ],
+                            );
+                          }
+                      );
                     },
-                    child: Text('Nhận diện vật thể')),
+                    child: Text('Vật thể')),
                 ElevatedButton(
                     onPressed: (){
-
+                      if (_imageFile != null) {
+                        context.read<ImageTranslationBloc>().add(TranslationEvent(File(_imageFile!.path), 'vi','line'),);
+                      }
                     },
-                    child: Text('Nhận diện chữ')),
+                    child: Text('Từng dòng')),
+                ElevatedButton(
+                    onPressed: (){
+                      if (_imageFile != null) {
+                        context.read<ImageTranslationBloc>().add(TranslationEvent(File(_imageFile!.path), 'vi','word'),);
+                      }
+                    },
+                    child: Text('Từng từ')),
               ],
             ),
-
-            BlocBuilder<ObjectDetectionBloc, ObjectDetectionState>(
-              builder: (context, state) {
-                if (state is ObjectDetectionInitial) {
-                  return const Text("Chưa có dữ liệu nhận diện.");
-                }
-
-                if (state is ObjectDetectionLoading) {
+            SizedBox(height: 10,),
+            // BlocBuilder<ObjectDetectionBloc, ObjectDetectionState>(
+            //   builder: (context, state) {
+            //     if (state is ObjectDetectionInitial) {
+            //       return const Text("Chưa có dữ liệu nhận diện.");
+            //     }
+            //
+            //     if (state is ObjectDetectionLoading) {
+            //       return const Center(child: CircularProgressIndicator());
+            //     }
+            //
+            //     if (state is ObjectDetectionSuccess) {
+            //       return Column(
+            //         children: state.labels.map((e) {
+            //           return Text("${e.label} - ${(e.confidence * 100).toStringAsFixed(1)}%");
+            //         }).toList(),
+            //       );
+            //     }
+            //
+            //     if (state is ObjectDetectionFailure) {
+            //       return Text(
+            //         "Lỗi: ${state.message}",
+            //         style: const TextStyle(color: Colors.red),
+            //       );
+            //     }
+            //
+            //     return const SizedBox.shrink();
+            //   },
+            // ),
+            BlocBuilder<ImageTranslationBloc, ImageTranslationState>(
+              builder: (context, state){
+                if (state is ImageTranslationInitial) {
+                  return const Center(child: Text('Chọn ảnh để bắt đầu'));
+                } else if (state is ImageTranslationLoading) {
                   return const Center(child: CircularProgressIndicator());
-                }
-
-                if (state is ObjectDetectionSuccess) {
+                } else if (state is ImageTranslationSuccess) {
                   return Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+                    crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
-                      const Text(
-                        "Kết quả nhận diện:",
-                        style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                      // Tiêu đề cho danh sách kết quả
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+                        child: Text(
+                          'Kết quả',
+                          style: TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                            color: Theme.of(context).colorScheme.primary,
+                          ),
+                        ),
                       ),
-                      const SizedBox(height: 8),
-                      ...state.labels.map((label) => Text("• $label")).toList(),
+                      ...state.result.lines.asMap().entries.map((entry) {
+                        final index = entry.key;
+                        final line = entry.value;
+                        return Column(
+                          children: [
+                            Card(
+                              elevation: 2,
+                              margin: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 4.0),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12.0),
+                              ),
+                              child: ListTile(
+                                contentPadding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+                                title: Text(
+                                  'English: ${line.originalText}',
+                                  style: const TextStyle(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.w600,
+                                    color: Colors.blue, // Màu chữ cho bản gốc
+                                  ),
+                                ),
+                                subtitle: Padding(
+                                  padding: const EdgeInsets.only(top: 4.0),
+                                  child: Text(
+                                    'Việt: ${line.translatedText}',
+                                    style: TextStyle(
+                                      fontSize: 14,
+                                      fontStyle: FontStyle.italic, // Chữ nghiêng cho bản dịch
+                                      color: Colors.green[700], // Màu chữ cho bản dịch
+                                    ),
+                                  ),
+                                ),
+                                trailing: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    IconButton(
+                                      icon: const Icon(Icons.volume_up, color: Colors.blue),
+                                      onPressed: () {},
+                                      tooltip: 'Phát âm',
+                                    ),
+                                    IconButton(
+                                      icon: const Icon(Icons.save, color: Colors.green),
+                                      onPressed: () {}, // Hàm xử lý nút lưu (rỗng)
+                                      tooltip: 'Lưu',
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+
+                            if (index < state.result.lines.length - 1)
+                              const Divider(
+                                height: 1,
+                                indent: 16.0,
+                                endIndent: 16.0,
+                              ),
+                          ],
+                        );
+                      }).toList(),
                     ],
                   );
+                } else {
+                  return const Center(child: Text('Có lỗi xảy ra'));
                 }
-
-                if (state is ObjectDetectionFailure) {
-                  return Text(
-                    "Lỗi: ${state.message}",
-                    style: const TextStyle(color: Colors.red),
-                  );
-                }
-
-                return const SizedBox.shrink();
-              },
-            )
+              }
+            ),
           ],
         ),
       )

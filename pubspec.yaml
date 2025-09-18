@@ -16,6 +16,9 @@ dependencies:
   google_mlkit_text_recognition: ^0.15.0
   google_mlkit_translation: ^0.13.0
   google_mlkit_object_detection: ^0.15.0
+  google_mlkit_language_id: ^0.13.0
+
+  get_it: ^8.2.0
 
   path_provider: ^2.1.5
   image_picker: ^1.0.7
