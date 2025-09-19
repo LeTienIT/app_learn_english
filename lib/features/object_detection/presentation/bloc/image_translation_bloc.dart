@@ -1,7 +1,7 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:learn_english/features/object_detection/presentation/bloc/image_translation_event.dart';
 import 'package:learn_english/features/object_detection/presentation/bloc/image_translation_state.dart';
-import '../../domain/entity/TextTranslationResult.dart';
+import '../../domain/entities/TextTranslationResult.dart';
 import '../../domain/use_case/TranslateUseCase.dart';
 
 class ImageTranslationBloc extends Bloc<ImageTranslationEvent, ImageTranslationState> {

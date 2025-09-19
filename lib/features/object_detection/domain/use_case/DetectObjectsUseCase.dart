@@ -1,6 +1,6 @@
 import 'dart:io';
 
-import '../entity/DetectedLabel.dart';
+import '../entities/DetectedLabel.dart';
 import '../repository/ObjectDetectionRepository.dart';
 
 class DetectObjectsUseCase {

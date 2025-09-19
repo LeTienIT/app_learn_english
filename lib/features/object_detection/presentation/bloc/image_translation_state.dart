@@ -1,4 +1,4 @@
-import '../../domain/entity/TextTranslationResult.dart';
+import '../../domain/entities/TextTranslationResult.dart';
 
 abstract class ImageTranslationState {}
 

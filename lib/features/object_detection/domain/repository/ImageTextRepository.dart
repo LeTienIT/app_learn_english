@@ -1,5 +1,5 @@
 import 'dart:io';
-import '../entity/TextTranslationResult.dart';
+import '../entities/TextTranslationResult.dart';
 
 abstract class ImageTextRepository {
   /// Xử lý ảnh: nhận diện văn bản và dịch từng dòng sang ngôn ngữ đích.

@@ -3,7 +3,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/services.dart';
 import 'package:google_mlkit_object_detection/google_mlkit_object_detection.dart';
 import 'package:path_provider/path_provider.dart';
-import '../../domain/entity/DetectedLabel.dart';
+import '../../domain/entities/DetectedLabel.dart';
 
 class MlkitObjectDetectionDatasource {
   late final ObjectDetector _objectDetector;

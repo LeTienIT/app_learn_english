@@ -1,5 +1,5 @@
 import 'dart:io';
-import '../../domain/entity/TextTranslationResult.dart';
+import '../../domain/entities/TextTranslationResult.dart';
 import '../../domain/repository/ImageTextRepository.dart';
 import '../data_source/image_text_datasource.dart';
 

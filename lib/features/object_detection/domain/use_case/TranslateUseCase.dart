@@ -1,6 +1,6 @@
 import 'dart:io';
 
-import '../entity/TextTranslationResult.dart';
+import '../entities/TextTranslationResult.dart';
 import '../repository/ImageTextRepository.dart';
 
 class ProcessImageAndTranslateUseCase {

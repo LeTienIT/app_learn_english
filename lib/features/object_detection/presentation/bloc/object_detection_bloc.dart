@@ -1,5 +1,5 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
-import '../../domain/entity/DetectedLabel.dart';
+import '../../domain/entities/DetectedLabel.dart';
 import '../../domain/use_case/DetectObjectsUseCase.dart';
 import 'object_detection_event.dart';
 import 'object_detection_state.dart';

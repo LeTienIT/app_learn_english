@@ -1,6 +1,6 @@
 import 'dart:io';
 
-import '../../domain/entity/DetectedLabel.dart';
+import '../../domain/entities/DetectedLabel.dart';
 import '../../domain/repository/ObjectDetectionRepository.dart';
 import '../data_source/mlkit_object_detection_datasource.dart';
 

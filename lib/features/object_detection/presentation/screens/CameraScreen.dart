@@ -1,15 +1,22 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_tts/flutter_tts.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:image_cropper/image_cropper.dart';
 import 'package:learn_english/features/object_detection/presentation/bloc/image_translation_bloc.dart';
 import 'package:learn_english/features/object_detection/presentation/bloc/image_translation_state.dart';
 import 'package:learn_english/features/object_detection/presentation/bloc/object_detection_event.dart';
-
+import '../../../dictionary/presentation/bloc/word_bloc.dart';
+import '../../../dictionary/presentation/bloc/word_event.dart';
+import '../../../shared/widget/word_input_form.dart';
+import '../../domain/use_case/PickAndCropImageUseCase.dart';
+import '../../domain/use_case/TextToSpeechUseCase.dart';
 import '../bloc/image_translation_event.dart';
 import '../bloc/object_detection_bloc.dart';
 import '../bloc/object_detection_state.dart';
+
+import 'package:learn_english/injection/injection.dart' as di;
 
 class ObjectDetectionPage extends StatefulWidget {
   const ObjectDetectionPage({super.key});
@@ -20,44 +27,31 @@ class ObjectDetectionPage extends StatefulWidget {
 
 class _ObjectDetectionPageState extends State<ObjectDetectionPage> {
   File? _imageFile;
+  final ttsUseCase = di.sl<TextToSpeechUseCase>();
 
-  Future<void> _pickAndCropImage() async {
-    final picker = ImagePicker();
-    final pickedFile = await picker.pickImage(source: ImageSource.camera);
+  @override
+  void initState() {
+    super.initState();
+  }
 
-    if (pickedFile == null) return;
-
-    try {
-      final CroppedFile? croppedFile = await ImageCropper().cropImage(
-        sourcePath: pickedFile.path,
-        compressFormat: ImageCompressFormat.jpg,
-        compressQuality: 70,
-        uiSettings: [
-          AndroidUiSettings(
-            toolbarTitle: 'Crop Ảnh',
-            toolbarColor: Colors.deepPurple,
-            toolbarWidgetColor: Colors.white,
-            initAspectRatio: CropAspectRatioPreset.original,
-            lockAspectRatio: false,
+  void _showAddWordDialog(BuildContext context, {String? english, String? vietnamese, bool isEdit = false}) {
+    showDialog(
+      context: context,
+      builder: (_) {
+        return AlertDialog(
+          title: Text(isEdit ? "Edit Word" : "Add Word"),
+          content: WordInputForm(
+            initialEnglish: english,
+            initialVietnamese: vietnamese,
+            isEdit: isEdit,
+            onSubmit: (word) {
+              Navigator.of(context).pop(); // đóng popup
+              context.read<WordBloc>().add(AddWordEvent(word));
+            },
           ),
-          IOSUiSettings(
-            title: 'Crop Ảnh',
-            aspectRatioLockEnabled: false,
-          ),
-        ],
-      );
-      if (croppedFile != null) {
-        setState(() {
-          _imageFile = File(croppedFile.path);
-        });
-      }
-    } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Lỗi khi crop ảnh: $e')),
         );
-      }
-    }
+      },
+    );
   }
 
   @override
@@ -76,7 +70,22 @@ class _ObjectDetectionPageState extends State<ObjectDetectionPage> {
             const SizedBox(height: 20),
 
             ElevatedButton.icon(
-              onPressed: _pickAndCropImage,
+              onPressed: () async {
+                final useCase = di.sl<PickAndCropImageUseCase>();
+
+                try {
+                  final file = await useCase();
+                  if (file != null && mounted) {
+                    setState(() => _imageFile = file);
+                  }
+                } catch (e) {
+                  if (mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text('Lỗi khi crop ảnh: $e')),
+                    );
+                  }
+                }
+              },
               icon: const Icon(Icons.camera_alt),
               label: const Text("Chụp ảnh"),
             ),
@@ -166,7 +175,6 @@ class _ObjectDetectionPageState extends State<ObjectDetectionPage> {
                   return Column(
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
-                      // Tiêu đề cho danh sách kết quả
                       Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
                         child: Text(
@@ -215,12 +223,16 @@ class _ObjectDetectionPageState extends State<ObjectDetectionPage> {
                                   children: [
                                     IconButton(
                                       icon: const Icon(Icons.volume_up, color: Colors.blue),
-                                      onPressed: () {},
+                                      onPressed: () {
+                                        ttsUseCase.call(line.originalText);
+                                      },
                                       tooltip: 'Phát âm',
                                     ),
                                     IconButton(
                                       icon: const Icon(Icons.save, color: Colors.green),
-                                      onPressed: () {}, // Hàm xử lý nút lưu (rỗng)
+                                      onPressed: () {
+                                        _showAddWordDialog(context, english: line.originalText, vietnamese: line.translatedText, isEdit: false);
+                                      },
                                       tooltip: 'Lưu',
                                     ),
                                   ],

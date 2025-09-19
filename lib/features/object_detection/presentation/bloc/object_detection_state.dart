@@ -1,4 +1,4 @@
-import '../../domain/entity/DetectedLabel.dart';
+import '../../domain/entities/DetectedLabel.dart';
 
 abstract class ObjectDetectionState {}
 
