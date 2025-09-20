@@ -11,6 +11,11 @@ class WordLoaded extends WordState {
   WordLoaded(this.words);
 }
 
+class WordAddSuccess extends WordState {
+  final Word word;
+  WordAddSuccess(this.word);
+}
+
 class WordError extends WordState {
   final String message;
   WordError(this.message);

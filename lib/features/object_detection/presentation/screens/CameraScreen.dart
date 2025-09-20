@@ -7,8 +7,11 @@ import 'package:image_cropper/image_cropper.dart';
 import 'package:learn_english/features/object_detection/presentation/bloc/image_translation_bloc.dart';
 import 'package:learn_english/features/object_detection/presentation/bloc/image_translation_state.dart';
 import 'package:learn_english/features/object_detection/presentation/bloc/object_detection_event.dart';
+import 'package:learn_english/features/shared/widget/menu.dart';
+import '../../../dictionary/domain/entities/word.dart';
 import '../../../dictionary/presentation/bloc/word_bloc.dart';
 import '../../../dictionary/presentation/bloc/word_event.dart';
+import '../../../dictionary/presentation/bloc/word_state.dart';
 import '../../../shared/widget/word_input_form.dart';
 import '../../domain/use_case/PickAndCropImageUseCase.dart';
 import '../../domain/use_case/TextToSpeechUseCase.dart';
@@ -34,30 +37,12 @@ class _ObjectDetectionPageState extends State<ObjectDetectionPage> {
     super.initState();
   }
 
-  void _showAddWordDialog(BuildContext context, {String? english, String? vietnamese, bool isEdit = false}) {
-    showDialog(
-      context: context,
-      builder: (_) {
-        return AlertDialog(
-          title: Text(isEdit ? "Edit Word" : "Add Word"),
-          content: WordInputForm(
-            initialEnglish: english,
-            initialVietnamese: vietnamese,
-            isEdit: isEdit,
-            onSubmit: (word) {
-              Navigator.of(context).pop(); // đóng popup
-              context.read<WordBloc>().add(AddWordEvent(word));
-            },
-          ),
-        );
-      },
-    );
-  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text("Nhận diên & dịch"),centerTitle: true,),
+      appBar: AppBar(title: const Text("Quét ảnh"),centerTitle: true,),
+      drawer: Drawer(child: MenuShare(),),
       body: SingleChildScrollView(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -137,41 +122,15 @@ class _ObjectDetectionPageState extends State<ObjectDetectionPage> {
               ],
             ),
             SizedBox(height: 10,),
-            // BlocBuilder<ObjectDetectionBloc, ObjectDetectionState>(
-            //   builder: (context, state) {
-            //     if (state is ObjectDetectionInitial) {
-            //       return const Text("Chưa có dữ liệu nhận diện.");
-            //     }
-            //
-            //     if (state is ObjectDetectionLoading) {
-            //       return const Center(child: CircularProgressIndicator());
-            //     }
-            //
-            //     if (state is ObjectDetectionSuccess) {
-            //       return Column(
-            //         children: state.labels.map((e) {
-            //           return Text("${e.label} - ${(e.confidence * 100).toStringAsFixed(1)}%");
-            //         }).toList(),
-            //       );
-            //     }
-            //
-            //     if (state is ObjectDetectionFailure) {
-            //       return Text(
-            //         "Lỗi: ${state.message}",
-            //         style: const TextStyle(color: Colors.red),
-            //       );
-            //     }
-            //
-            //     return const SizedBox.shrink();
-            //   },
-            // ),
             BlocBuilder<ImageTranslationBloc, ImageTranslationState>(
               builder: (context, state){
                 if (state is ImageTranslationInitial) {
                   return const Center(child: Text('Chọn ảnh để bắt đầu'));
-                } else if (state is ImageTranslationLoading) {
+                }
+                else if (state is ImageTranslationLoading) {
                   return const Center(child: CircularProgressIndicator());
-                } else if (state is ImageTranslationSuccess) {
+                }
+                else if (state is ImageTranslationSuccess) {
                   return Column(
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
@@ -231,7 +190,22 @@ class _ObjectDetectionPageState extends State<ObjectDetectionPage> {
                                     IconButton(
                                       icon: const Icon(Icons.save, color: Colors.green),
                                       onPressed: () {
-                                        _showAddWordDialog(context, english: line.originalText, vietnamese: line.translatedText, isEdit: false);
+                                        // _showAddWordDialog(context, english: line.originalText, vietnamese: line.translatedText, isEdit: false);
+                                        showDialog(
+                                          context: context,
+                                          builder: (_) => AddWordDialog(
+                                            initialEnglish: line.originalText,
+                                            initialVietnamese: line.translatedText,
+                                            onSave: (en, vi) {
+                                              context.read<WordBloc>().add(AddWordEvent(Word(
+                                                english: en,
+                                                vietnamese: vi,
+                                                example: '',
+                                                favorite: false,
+                                              )));
+                                            },
+                                          ),
+                                        );
                                       },
                                       tooltip: 'Lưu',
                                     ),
@@ -251,11 +225,30 @@ class _ObjectDetectionPageState extends State<ObjectDetectionPage> {
                       }).toList(),
                     ],
                   );
-                } else {
+                }
+                else if (state is ImageTranslationFailure){
+                  return Center(child: Text(state.message));
+                }
+                else {
                   return const Center(child: Text('Có lỗi xảy ra'));
                 }
               }
             ),
+            BlocListener<WordBloc, WordState>(
+              listener: (context, state) {
+                if (state is WordAddSuccess) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text("Thêm từ '${state.word.english}' thành công"), backgroundColor: Colors.green,),
+                  );
+                }
+                else if (state is WordError) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text(state.message),backgroundColor: Colors.redAccent,duration: Duration(seconds: 2),),
+                  );
+                }
+              },
+              child: SizedBox.shrink(),
+            )
           ],
         ),
       )

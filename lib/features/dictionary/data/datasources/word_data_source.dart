@@ -4,8 +4,8 @@ import '../models/word_data.dart';
 abstract class WordLocalDataSource {
   Future<int> addWord(WordData word);
   Future<List<WordData>> getAllWords();
-  Future<void> updateWord(WordData word);
-  Future<void> deleteWord(WordData word);
+  Future<void> updateWord(int key, WordData word);
+  Future<void> deleteWord(int key);
 }
 
 class WordLocalDataSourceImpl implements WordLocalDataSource {
@@ -24,12 +24,12 @@ class WordLocalDataSourceImpl implements WordLocalDataSource {
   }
 
   @override
-  Future<void> updateWord(WordData word) async {
-    await word.save(); // vì WordData extends HiveObject
+  Future<void> updateWord(int key, WordData word) async {
+    await box.put(key, word);
   }
 
   @override
-  Future<void> deleteWord(WordData word) async {
-    await word.delete();
+  Future<void> deleteWord(int key) async {
+    await box.delete(key);
   }
 }

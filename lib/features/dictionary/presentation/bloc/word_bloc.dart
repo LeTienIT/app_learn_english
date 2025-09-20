@@ -32,7 +32,13 @@ class WordBloc extends Bloc<WordEvent, WordState> {
   Future<void> _onAddWord(AddWordEvent event, Emitter<WordState> emit,) async {
     try {
       final rs = await addWord(event.word);
-      print("Thêm word: $rs");
+      if(rs == -1){
+        emit(WordError("Từ đã tồn tại, không thể thêm"));
+      }else {
+        emit(WordAddSuccess(event.word));
+        final words = await getAllWords();
+        emit(WordLoaded(words));
+      }
       final words = await getAllWords();
       emit(WordLoaded(words));
     } catch (e) {

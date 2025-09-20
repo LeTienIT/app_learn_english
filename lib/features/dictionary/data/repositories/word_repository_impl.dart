@@ -12,7 +12,6 @@ class WordRepositoryImpl implements WordRepository {
     final list = await localDataSource.getAllWords();
     final exists = list.any((w) => w.english.toLowerCase() == word.english.toLowerCase());
     if (exists) {
-      // throw Exception("Từ '${word.english}' đã tồn tại");
       return -1;
     }
     final wordData = WordData(
@@ -30,6 +29,7 @@ class WordRepositoryImpl implements WordRepository {
   Future<List<Word>> getAllWords() async {
     final list = await localDataSource.getAllWords();
     return list.map((data) => Word(
+      id: data.key as int?,
       english: data.english,
       vietnamese: data.vietnamese,
       example: data.example,
@@ -39,21 +39,25 @@ class WordRepositoryImpl implements WordRepository {
 
   @override
   Future<void> updateWord(Word word) async {
-    // Ở đây cần map Word -> WordData
-    // Nếu bạn có key thì nên fetch từ box trước rồi update
-    final list = await localDataSource.getAllWords();
-    final wordData = list.firstWhere((w) => w.english == word.english);
-    wordData
-      ..vietnamese = word.vietnamese
-      ..example = word.example
-      ..favorite = word.favorite;
-    await localDataSource.updateWord(wordData);
+    if (word.id == null) {
+      throw Exception("Word id is null, cannot update");
+    }
+
+    final wordData = WordData(
+      english: word.english,
+      vietnamese: word.vietnamese,
+      example: word.example,
+      favorite: word.favorite,
+    );
+
+    await localDataSource.updateWord(word.id!, wordData);
   }
 
   @override
   Future<void> deleteWord(Word word) async {
-    final list = await localDataSource.getAllWords();
-    final wordData = list.firstWhere((w) => w.english == word.english);
-    await localDataSource.deleteWord(wordData);
+    if (word.id == null) {
+      throw Exception("Word id is null, cannot update");
+    }
+    await localDataSource.deleteWord(word.id!);
   }
 }

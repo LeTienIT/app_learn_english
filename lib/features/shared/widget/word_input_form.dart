@@ -1,84 +1,86 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 
-import '../../dictionary/domain/entities/word.dart';
-import '../../dictionary/presentation/bloc/word_bloc.dart';
-import '../../dictionary/presentation/bloc/word_event.dart';
+class AddWordDialog extends StatefulWidget {
+  final String initialEnglish;
+  final String initialVietnamese;
+  final void Function(String english, String vietnamese) onSave;
 
-class WordInputForm extends StatefulWidget {
-  final String? initialEnglish;
-  final String? initialVietnamese;
-  final bool isEdit;
-  final void Function(Word word) onSubmit;
-
-
-
-  const WordInputForm({
+  const AddWordDialog({
     super.key,
-    this.initialEnglish,
-    this.initialVietnamese,
-    this.isEdit = false,
-    required this.onSubmit,
+    this.initialEnglish = '',
+    this.initialVietnamese = '',
+    required this.onSave,
   });
 
   @override
-  State<WordInputForm> createState() => _WordInputFormState();
+  State<AddWordDialog> createState() => _AddWordDialogState();
 }
 
-class _WordInputFormState extends State<WordInputForm> {
-  late final TextEditingController _englishController;
-  late final TextEditingController _vietnameseController;
+class _AddWordDialogState extends State<AddWordDialog> {
+  late TextEditingController englishController;
+  late TextEditingController vietnameseController;
 
   @override
   void initState() {
     super.initState();
-    _englishController = TextEditingController(text: widget.initialEnglish ?? "");
-    _vietnameseController = TextEditingController(text: widget.initialVietnamese ?? "");
+    englishController = TextEditingController(text: widget.initialEnglish);
+    vietnameseController = TextEditingController(text: widget.initialVietnamese);
   }
 
-  void _onSubmitPressed() {
-    final english = _englishController.text.trim();
-    final vietnamese = _vietnameseController.text.trim();
-
-    if (english.isEmpty || vietnamese.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Vui lòng nhập đủ English và Vietnamese")),
-      );
-      return;
-    }
-
-    final word = Word(
-      english: english,
-      vietnamese: vietnamese,
-    );
-
-    widget.onSubmit(word);
-
+  @override
+  void dispose() {
+    englishController.dispose();
+    vietnameseController.dispose();
+    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: [
-        TextField(
-          controller: _englishController,
-          decoration: const InputDecoration(
-            labelText: "English",
-            border: OutlineInputBorder(),
+    return AlertDialog(
+      title: const Text("Thêm từ mới"),
+      content: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          TextField(
+            controller: englishController,
+            decoration: const InputDecoration(labelText: "English"),
           ),
-        ),
-        const SizedBox(height: 10),
-        TextField(
-          controller: _vietnameseController,
-          decoration: const InputDecoration(
-            labelText: "Vietnamese",
-            border: OutlineInputBorder(),
+          TextField(
+            controller: vietnameseController,
+            decoration: const InputDecoration(labelText: "Vietnamese"),
           ),
+        ],
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(context),
+          child: const Text("Hủy"),
         ),
-        const SizedBox(height: 16),
         ElevatedButton(
-          onPressed: _onSubmitPressed,
-          child: Text(widget.isEdit ? "Update Word" : "Add Word"),
+          onPressed: () {
+            final english = englishController.text.trim();
+            final vn = vietnameseController.text.trim();
+
+            if(english.isEmpty || vn.isEmpty){
+              showDialog(context: context, builder: (_){
+                return AlertDialog(
+                  title: const Text("Lỗi"),
+                  content: const Text("Không được để trống"),
+                  actions: [
+                    TextButton(onPressed: ()=>Navigator.pop(context), child: const Text("Ok")),
+                  ],
+                );
+              });
+            }
+            else{
+              widget.onSave(
+                englishController.text.trim(),
+                vietnameseController.text.trim(),
+              );
+              Navigator.pop(context);
+            }
+          },
+          child: const Text("Lưu"),
         ),
       ],
     );
