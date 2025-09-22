@@ -4,12 +4,13 @@ class AddWordDialog extends StatefulWidget {
   final String initialEnglish;
   final String initialVietnamese;
   final void Function(String english, String vietnamese) onSave;
-
+  final bool add;
   const AddWordDialog({
     super.key,
     this.initialEnglish = '',
     this.initialVietnamese = '',
     required this.onSave,
+    this.add = true
   });
 
   @override
@@ -37,7 +38,7 @@ class _AddWordDialogState extends State<AddWordDialog> {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      title: const Text("Thêm từ mới"),
+      title: Text(widget.add ? "Thêm từ mới" : "Chỉnh sửa"),
       content: Column(
         mainAxisSize: MainAxisSize.min,
         children: [

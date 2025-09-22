@@ -74,6 +74,7 @@ class _DictionaryViewState extends State<DictionaryView> {
                             builder: (_) => AddWordDialog(
                               initialEnglish: word.english,
                               initialVietnamese: word.vietnamese,
+                              add: false,
                               onSave: (en, vi) {
                                 context.read<WordBloc>().add(UpdateWordEvent(
                                   Word(
@@ -113,6 +114,24 @@ class _DictionaryViewState extends State<DictionaryView> {
             ),
           ),
         ],
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: (){
+          showDialog(
+            context: context,
+            builder: (_) => AddWordDialog(
+              onSave: (en, vi) {
+                context.read<WordBloc>().add(AddWordEvent(Word(
+                  english: en,
+                  vietnamese: vi,
+                  example: '',
+                  favorite: false,
+                )));
+              },
+            ),
+          );
+        },
+        child: Icon(Icons.add),
       ),
     );
   }

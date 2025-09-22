@@ -4,12 +4,10 @@ import 'package:flutter/material.dart';
 import 'package:image_cropper/image_cropper.dart';
 import 'package:image_picker/image_picker.dart';
 
-import '../../domain/repository/ImageRepository.dart';
 
-class ImageService implements ImageRepository {
+class ImageService{
   final ImagePicker _picker = ImagePicker();
 
-  @override
   Future<File?> pickAndCropImage() async {
     final pickedFile = await _picker.pickImage(source: ImageSource.camera);
     if (pickedFile == null) return null;

@@ -12,8 +12,8 @@ import '../features/dictionary/domain/use_case/update_word.dart';
 import '../features/object_detection/data/data_source/image_text_datasource.dart';
 import '../features/object_detection/data/data_source/image_text_datasource_impl.dart';
 import '../features/object_detection/data/data_source/mlkit_object_detection_datasource.dart';
-import '../features/object_detection/data/repository/FlutterTtsService.dart';
-import '../features/object_detection/data/repository/ImageService.dart';
+import '../features/object_detection/data/repository/image_crop_impl.dart';
+import '../features/object_detection/data/repository/text_to_speech_impl.dart';
 import '../features/object_detection/data/repository/image_text_datasource_impl.dart';
 import '../features/object_detection/data/repository/object_detection_repository_impl.dart';
 import '../features/object_detection/domain/repository/ImageRepository.dart';
@@ -25,11 +25,16 @@ import '../features/object_detection/domain/use_case/TextToSpeechUseCase.dart';
 import '../features/object_detection/domain/use_case/TranslateUseCase.dart';
 import '../features/object_detection/presentation/bloc/image_translation_bloc.dart';
 import '../features/object_detection/presentation/bloc/object_detection_bloc.dart';
+import '../services/image/ImageService.dart';
+import '../services/tts/FlutterTtsService.dart';
 
 final sl = GetIt.instance;
 
 Future<void> init() async {
-  sl.registerLazySingleton<ImageRepository>(() => ImageService());
+  sl.registerLazySingleton(() => ImageService());
+
+  sl.registerLazySingleton<ImageRepository>(() => ImageImpl(sl()));
+
   sl.registerLazySingleton<PickAndCropImageUseCase>(
         () => PickAndCropImageUseCase(sl()),
   );
@@ -70,8 +75,10 @@ Future<void> init() async {
       () => TextToSpeechUseCase(sl()),
   );
 
+  sl.registerLazySingleton(() => FlutterTtsService());
+
   sl.registerLazySingleton<TextToSpeechRepository>(
-      () => FlutterTtsService(),
+      () => TextToSpeechImpl(sl()),
   );
 
   // 1. Open Hive box

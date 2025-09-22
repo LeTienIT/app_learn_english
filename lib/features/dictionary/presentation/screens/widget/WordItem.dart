@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../../../../../injection/injection.dart' as di;
+import '../../../../object_detection/domain/use_case/TextToSpeechUseCase.dart';
 import '../../../domain/entities/word.dart';
 
 class WordItem extends StatelessWidget {
@@ -63,11 +65,11 @@ class WordItem extends StatelessWidget {
               style: const TextStyle(fontStyle: FontStyle.italic, color: Colors.green),
             ),
             trailing: IconButton(
-              icon: Icon(
-                word.favorite ? Icons.star : Icons.star_border,
-                color: word.favorite ? Colors.amber : Colors.grey,
-              ),
-              onPressed: onToggleFavorite,
+              icon: const Icon(Icons.volume_up, color: Colors.blue),
+              onPressed: () {
+                di.sl<TextToSpeechUseCase>().call(word.english);
+              },
+              tooltip: 'Phát âm',
             ),
           ),
         ),
