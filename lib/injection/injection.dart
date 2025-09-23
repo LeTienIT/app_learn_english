@@ -26,6 +26,7 @@ import '../features/object_detection/domain/use_case/TranslateUseCase.dart';
 import '../features/object_detection/presentation/bloc/image_translation_bloc.dart';
 import '../features/object_detection/presentation/bloc/object_detection_bloc.dart';
 import '../services/image/ImageService.dart';
+import '../services/speech_to_text/SpeechService.dart';
 import '../services/tts/FlutterTtsService.dart';
 
 final sl = GetIt.instance;
@@ -99,4 +100,8 @@ Future<void> init() async {
   sl.registerLazySingleton(() => GetAllWords(sl()));
   sl.registerLazySingleton(() => UpdateWord(sl()));
   sl.registerLazySingleton(() => DeleteWord(sl()));
+
+  sl.registerLazySingleton<SpeechToTextService>(() => SpeechToTextService());
+
+  await sl<SpeechToTextService>().init();
 }

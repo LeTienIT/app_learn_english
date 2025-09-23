@@ -1,18 +1,28 @@
+import 'package:flutter/cupertino.dart';
 import 'package:speech_to_text/speech_to_text.dart';
 
 class SpeechToTextService {
   final SpeechToText _speechToText = SpeechToText();
   
   bool _available = true;
-  
-  Future<void> init() async{
-    _available = await _speechToText.initialize(
-      onStatus: (status) {
-      },
-      onError: (error) {
-        throw("Speech error: $error");
-      },
-    );
+
+  bool get available => _available;
+
+  Future<void> init() async {
+    try {
+      _available = await _speechToText.initialize(
+        onStatus: (status) {
+          debugPrint("Speech status: $status");
+        },
+        onError: (error) {
+          debugPrint("Speech error: $error");
+          _available = false; // không hỗ trợ
+        },
+      );
+    } catch (e) {
+      debugPrint("Speech init exception: $e");
+      _available = false;
+    }
   }
 
   Future<void> startListening({required Function(String text) onResult, bool partialResults = true,}) async {
