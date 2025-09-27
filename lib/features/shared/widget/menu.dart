@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import 'animated_menu_item.dart';
+
 class MenuShare extends StatefulWidget{
   const MenuShare({super.key});
 
@@ -12,27 +14,30 @@ class MenuShare extends StatefulWidget{
 class _MenuShare extends State<MenuShare>{
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: [
-        SizedBox(height: 10,),
-        Text("Menu", style: TextStyle(fontSize: 26,fontWeight: FontWeight.bold),),
-        SizedBox(height: 10,),
-        ListTile(
-          leading: const Icon(Icons.menu_book),
-          title: const Text("Danh sách từ"),
-          onTap: (){
-            Navigator.pushNamedAndRemoveUntil(context, '/dictionary', (route) => false);
-          },
-        ),
-        SizedBox(height: 10,),
-        ListTile(
-          leading: const Icon(Icons.camera_alt),
-          title: const Text("Quét ảnh"),
-          onTap: (){
-            Navigator.pushNamedAndRemoveUntil(context, '/imageObject', (route) => false);
-          },
-        ),
-      ],
+    return Padding(
+      padding: EdgeInsets.only(top: 28),
+      child: Column(
+        children: [
+          const SizedBox(height: 20),
+          const Text("Menu", style: TextStyle(fontSize: 26, fontWeight: FontWeight.bold)),
+          const Divider(height: 1),
+          AnimatedMenuItem(
+            icon: Icons.menu_book,
+            title: "Danh sách từ",
+            onTap: () => Navigator.pushNamed(context, '/dictionary'),
+          ),
+          AnimatedMenuItem(
+            icon: Icons.camera_alt,
+            title: "Quét ảnh",
+            onTap: () => Navigator.pushNamed(context, '/imageObject'),
+          ),
+          AnimatedMenuItem(
+            icon: Icons.assignment_outlined,
+            title: "Luyện tập",
+            onTap: () => Navigator.pushNamed(context, '/quiz'),
+          ),
+        ],
+      ),
     );
   }
 

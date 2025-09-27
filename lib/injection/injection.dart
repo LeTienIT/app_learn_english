@@ -1,6 +1,7 @@
 import 'package:get_it/get_it.dart';
 import 'package:hive/hive.dart';
 import 'package:learn_english/features/object_detection/domain/repository/ObjectDetectionRepository.dart';
+import 'package:learn_english/features/quiz/presentation/bloc/quiz_bloc.dart';
 import '../features/dictionary/data/datasources/word_data_source.dart';
 import '../features/dictionary/data/models/word_data.dart';
 import '../features/dictionary/data/repositories/word_repository_impl.dart';
@@ -25,6 +26,9 @@ import '../features/object_detection/domain/use_case/TextToSpeechUseCase.dart';
 import '../features/object_detection/domain/use_case/TranslateUseCase.dart';
 import '../features/object_detection/presentation/bloc/image_translation_bloc.dart';
 import '../features/object_detection/presentation/bloc/object_detection_bloc.dart';
+import '../features/quiz/data/repositories/quiz_repository_impl.dart';
+import '../features/quiz/domain/repositories/quiz_repository.dart';
+import '../features/quiz/domain/use_case/generate_use_case.dart';
 import '../services/image/ImageService.dart';
 import '../services/speech_to_text/SpeechService.dart';
 import '../services/tts/FlutterTtsService.dart';
@@ -104,4 +108,12 @@ Future<void> init() async {
   sl.registerLazySingleton<SpeechToTextService>(() => SpeechToTextService());
 
   await sl<SpeechToTextService>().init();
+
+  sl.registerLazySingleton(() => GenerateQuiz(sl()));
+
+  sl.registerLazySingleton<QuizRepository>(
+        () => QuizRepositoryImpl(sl()),
+  );
+
+  sl.registerLazySingleton(() => QuizBloc(generateQuiz: sl()));
 }

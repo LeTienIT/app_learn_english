@@ -4,6 +4,9 @@ import 'package:hive/hive.dart';
 import 'package:hive_flutter/adapters.dart';
 import 'package:learn_english/features/dictionary/data/models/word_data.dart';
 import 'package:learn_english/features/object_detection/presentation/bloc/image_translation_bloc.dart';
+import 'package:learn_english/features/quiz/presentation/bloc/quiz_bloc.dart';
+import 'package:learn_english/features/quiz/presentation/screens/exercise_screen.dart';
+import 'package:learn_english/features/quiz/presentation/screens/quiz_screen.dart';
 import 'features/dictionary/domain/use_case/add_word.dart';
 import 'features/dictionary/domain/use_case/delete_word.dart';
 import 'features/dictionary/domain/use_case/get_all_word.dart';
@@ -33,11 +36,38 @@ void main() async{
           updateWord: di.sl<UpdateWord>(),
           deleteWord: di.sl<DeleteWord>(),
         )..add(LoadWords())),
+        BlocProvider(create: (_) => di.sl<QuizBloc>()),
+
       ],
       child: MaterialApp(
-        routes: {
-          '/imageObject': (context) => const ObjectDetectionPage(),
-          '/dictionary': (context) => const DictionaryView(),
+        initialRoute: '/imageObject',
+        onGenerateRoute: (settings) {
+          switch (settings.name) {
+            case '/imageObject':
+              return MaterialPageRoute(
+                builder: (_) => const ObjectDetectionPage(),
+              );
+            case '/dictionary':
+              return MaterialPageRoute(
+                builder: (_) => const DictionaryView(),
+              );
+            case '/quiz':
+              return MaterialPageRoute(
+                builder: (_) => const QuizScreen(),
+              );
+            case '/excercise':
+              final args = settings.arguments as Map<String, dynamic>?;
+              return MaterialPageRoute(
+                builder: (_) => ExerciseScreen(
+                  numberQ: args?['numberQ'] ?? 10,
+                  typeQ: args?['typeQ'] ?? "all",
+                ),
+              );
+            default:
+              return MaterialPageRoute(
+                builder: (_) => const ObjectDetectionPage(), // fallback nếu route sai
+              );
+          }
         },
         home: const ObjectDetectionPage(),
       ),

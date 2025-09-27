@@ -47,6 +47,7 @@ class _ObjectDetectionPageState extends State<ObjectDetectionPage> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
+            Divider(height: 1,),
             if (_imageFile != null)
               Image.file(_imageFile!, height: 200, fit: BoxFit.cover,)
             else

@@ -26,6 +26,7 @@ class _DictionaryViewState extends State<DictionaryView> {
       drawer: Drawer(child: MenuShare(),),
       body: Column(
         children: [
+          Divider(height: 1,),
           Padding(
             padding: const EdgeInsets.all(8.0),
             child: TextField(

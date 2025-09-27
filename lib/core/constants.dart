@@ -1,0 +1,1 @@
+const int requiredWord = 2;
