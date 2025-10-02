@@ -2,6 +2,10 @@ import 'package:get_it/get_it.dart';
 import 'package:hive/hive.dart';
 import 'package:learn_english/features/object_detection/domain/repository/ObjectDetectionRepository.dart';
 import 'package:learn_english/features/quiz/presentation/bloc/quiz_bloc.dart';
+import 'package:learn_english/features/setting/presentation/bloc/setting_bloc.dart';
+import 'package:learn_english/features/setting/presentation/bloc/setting_event.dart';
+import 'package:learn_english/services/app_storage/share_preferences.dart';
+import 'package:learn_english/services/music/audio_player.dart';
 import '../features/dictionary/data/datasources/word_data_source.dart';
 import '../features/dictionary/data/models/word_data.dart';
 import '../features/dictionary/data/repositories/word_repository_impl.dart';
@@ -116,4 +120,11 @@ Future<void> init() async {
   );
 
   sl.registerLazySingleton(() => QuizBloc(generateQuiz: sl()));
+
+  sl.registerLazySingleton(() => AudioPlayerService());
+
+  sl.registerLazySingleton(() => AppStorageService());
+  sl.registerLazySingleton(() => SettingsBloc(sl()));
+
+  sl<SettingsBloc>().add(LoadSettings());
 }

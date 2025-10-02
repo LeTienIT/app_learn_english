@@ -4,6 +4,7 @@ import 'dart:math';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:learn_english/features/quiz/presentation/bloc/quiz_event.dart';
 import 'package:learn_english/features/quiz/presentation/bloc/quiz_state.dart';
+import 'package:learn_english/services/music/audio_player.dart';
 
 import '../../../../injection/injection.dart' as di;
 import '../../../../services/speech_to_text/SpeechService.dart';
@@ -32,6 +33,7 @@ class QuizBloc extends Bloc<QuizEvent, QuizState> {
   Future<void> _onStartQuiz(StartQuiz event, Emitter<QuizState> emit) async {
     emit(QuizLoading());
     try {
+      di.sl<AudioPlayerService>().stopBackground();
       final qs = await generateQuiz.call(numberOfQuestions: event.numberOfQuestions, typeQ: event.typeQ);
       if (qs.isEmpty) {
         emit(QuizError('Không có từ nào trong danh sách'));
@@ -96,6 +98,7 @@ class QuizBloc extends Bloc<QuizEvent, QuizState> {
     final isCorrect = _evaluateAnswer(q, event.answer);
 
     if (isCorrect) {
+      di.sl<AudioPlayerService>().playCorrect();
       _timer?.cancel();
       _markAnswer(true, givenAnswer: event.answer);
 
@@ -113,7 +116,9 @@ class QuizBloc extends Bloc<QuizEvent, QuizState> {
       Future.delayed(const Duration(milliseconds: 1000), () {
         add(NextQuestion());
       });
-    } else {
+    }
+    else {
+      di.sl<AudioPlayerService>().playWrong();
       emit((state as QuizInProgress).copyWith(
         showFeedback: true,
         lastAnswerCorrect: false,
@@ -130,6 +135,7 @@ class QuizBloc extends Bloc<QuizEvent, QuizState> {
   void _goNext(Emitter<QuizState> emit) {
     if (_currentIndex >= _questions.length - 1) {
       _timer?.cancel();
+      di.sl<AudioPlayerService>().playFinished();
       emit(QuizFinished(score: _score, total: _questions.length, results: List<int>.from(_results)));
       return;
     }

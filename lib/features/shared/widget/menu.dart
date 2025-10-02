@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../../../injection/injection.dart' as di;
+import '../../../services/music/audio_player.dart';
 import 'animated_menu_item.dart';
 
 class MenuShare extends StatefulWidget{
@@ -24,17 +26,34 @@ class _MenuShare extends State<MenuShare>{
           AnimatedMenuItem(
             icon: Icons.menu_book,
             title: "Danh sách từ",
-            onTap: () => Navigator.pushNamed(context, '/dictionary'),
+            onTap: () {
+              di.sl<AudioPlayerService>().stopBackground();
+              Navigator.pushNamedAndRemoveUntil(context, '/dictionary', (router) => false);
+            },
           ),
           AnimatedMenuItem(
             icon: Icons.camera_alt,
             title: "Quét ảnh",
-            onTap: () => Navigator.pushNamed(context, '/imageObject'),
+            onTap: (){
+                di.sl<AudioPlayerService>().stopBackground();
+                Navigator.pushNamedAndRemoveUntil(context, '/imageObject',(router)=>false);
+              },
           ),
           AnimatedMenuItem(
             icon: Icons.assignment_outlined,
             title: "Luyện tập",
-            onTap: () => Navigator.pushNamed(context, '/quiz'),
+            onTap: () {
+              di.sl<AudioPlayerService>().stopBackground();
+              Navigator.pushNamedAndRemoveUntil(context, '/quiz', (router) => false);
+            },
+          ),
+          AnimatedMenuItem(
+            icon: Icons.assignment_outlined,
+              title: "Cài đặt",
+            onTap: () {
+              di.sl<AudioPlayerService>().stopBackground();
+              Navigator.pushNamedAndRemoveUntil(context, '/setting', (router) => false);
+            },
           ),
         ],
       ),

@@ -7,6 +7,9 @@ import 'package:learn_english/features/object_detection/presentation/bloc/image_
 import 'package:learn_english/features/quiz/presentation/bloc/quiz_bloc.dart';
 import 'package:learn_english/features/quiz/presentation/screens/exercise_screen.dart';
 import 'package:learn_english/features/quiz/presentation/screens/quiz_screen.dart';
+import 'package:learn_english/features/setting/presentation/bloc/setting_bloc.dart';
+import 'package:learn_english/features/setting/presentation/screen/setting_screen.dart';
+import 'package:learn_english/services/app_storage/share_preferences.dart';
 import 'features/dictionary/domain/use_case/add_word.dart';
 import 'features/dictionary/domain/use_case/delete_word.dart';
 import 'features/dictionary/domain/use_case/get_all_word.dart';
@@ -37,7 +40,8 @@ void main() async{
           deleteWord: di.sl<DeleteWord>(),
         )..add(LoadWords())),
         BlocProvider(create: (_) => di.sl<QuizBloc>()),
-
+        BlocProvider(create: (_) => di.sl<QuizBloc>()),
+        BlocProvider(create: (_) => di.sl<SettingsBloc>()),
       ],
       child: MaterialApp(
         initialRoute: '/imageObject',
@@ -62,6 +66,10 @@ void main() async{
                   numberQ: args?['numberQ'] ?? 10,
                   typeQ: args?['typeQ'] ?? "all",
                 ),
+              );
+            case '/setting':
+              return MaterialPageRoute(
+                builder: (_) => const SettingsScreen(),
               );
             default:
               return MaterialPageRoute(

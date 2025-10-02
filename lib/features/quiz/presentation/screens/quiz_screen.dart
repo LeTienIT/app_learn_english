@@ -6,6 +6,8 @@ import 'package:learn_english/features/quiz/presentation/widgets/text_widget.dar
 import 'package:learn_english/features/shared/widget/menu.dart';
 
 import '../../../../core/constants.dart';
+import '../../../../injection/injection.dart' as di;
+import '../../../../services/music/audio_player.dart';
 import '../../../dictionary/presentation/bloc/word_bloc.dart';
 import '../../../dictionary/presentation/bloc/word_state.dart';
 
@@ -25,6 +27,7 @@ class _QuizScreenState extends State<QuizScreen> {
   @override
   void initState() {
     super.initState();
+    di.sl<AudioPlayerService>().playBackground();
   }
 
   @override
