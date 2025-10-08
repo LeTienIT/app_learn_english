@@ -1,6 +1,8 @@
+
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:hive/hive.dart';
 import 'package:hive_flutter/adapters.dart';
 import 'package:learn_english/features/dictionary/data/models/word_data.dart';
 import 'package:learn_english/features/object_detection/presentation/bloc/image_translation_bloc.dart';
@@ -9,7 +11,6 @@ import 'package:learn_english/features/quiz/presentation/screens/exercise_screen
 import 'package:learn_english/features/quiz/presentation/screens/quiz_screen.dart';
 import 'package:learn_english/features/setting/presentation/bloc/setting_bloc.dart';
 import 'package:learn_english/features/setting/presentation/screen/setting_screen.dart';
-import 'package:learn_english/services/app_storage/share_preferences.dart';
 import 'features/dictionary/domain/use_case/add_word.dart';
 import 'features/dictionary/domain/use_case/delete_word.dart';
 import 'features/dictionary/domain/use_case/get_all_word.dart';
@@ -48,8 +49,10 @@ void main() async{
         onGenerateRoute: (settings) {
           switch (settings.name) {
             case '/imageObject':
+              final Map<String, dynamic>? args = settings.arguments as Map<String, dynamic>?;
+              final File? imageFile = args?['imageFile'];
               return MaterialPageRoute(
-                builder: (_) => const ObjectDetectionPage(),
+                builder: (_) => ObjectDetectionPage(imageF: imageFile),
               );
             case '/dictionary':
               return MaterialPageRoute(
@@ -73,11 +76,11 @@ void main() async{
               );
             default:
               return MaterialPageRoute(
-                builder: (_) => const ObjectDetectionPage(), // fallback nếu route sai
+                builder: (_) => ObjectDetectionPage(), // fallback nếu route sai
               );
           }
         },
-        home: const ObjectDetectionPage(),
+        home: ObjectDetectionPage(),
       ),
     ),
   );

@@ -1,12 +1,8 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_tts/flutter_tts.dart';
-import 'package:image_picker/image_picker.dart';
-import 'package:image_cropper/image_cropper.dart';
 import 'package:learn_english/features/object_detection/presentation/bloc/image_translation_bloc.dart';
 import 'package:learn_english/features/object_detection/presentation/bloc/image_translation_state.dart';
-import 'package:learn_english/features/object_detection/presentation/bloc/object_detection_event.dart';
 import 'package:learn_english/features/shared/widget/menu.dart';
 import '../../../dictionary/domain/entities/word.dart';
 import '../../../dictionary/presentation/bloc/word_bloc.dart';
@@ -16,13 +12,14 @@ import '../../../shared/widget/word_input_form.dart';
 import '../../domain/use_case/PickAndCropImageUseCase.dart';
 import '../../domain/use_case/TextToSpeechUseCase.dart';
 import '../bloc/image_translation_event.dart';
-import '../bloc/object_detection_bloc.dart';
-import '../bloc/object_detection_state.dart';
 
 import 'package:learn_english/injection/injection.dart' as di;
 
+import 'CameraPage.dart';
+
 class ObjectDetectionPage extends StatefulWidget {
-  const ObjectDetectionPage({super.key});
+  File? imageF;
+  ObjectDetectionPage({super.key, this.imageF});
 
   @override
   State<ObjectDetectionPage> createState() => _ObjectDetectionPageState();
@@ -34,6 +31,7 @@ class _ObjectDetectionPageState extends State<ObjectDetectionPage> {
 
   @override
   void initState() {
+    if(widget.imageF != null) _imageFile = widget.imageF;
     super.initState();
   }
 
@@ -55,25 +53,40 @@ class _ObjectDetectionPageState extends State<ObjectDetectionPage> {
 
             const SizedBox(height: 20),
 
-            ElevatedButton.icon(
-              onPressed: () async {
-                final useCase = di.sl<PickAndCropImageUseCase>();
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                ElevatedButton.icon(
+                  onPressed: () async {
+                    final useCase = di.sl<PickAndCropImageUseCase>();
 
-                try {
-                  final file = await useCase();
-                  if (file != null && mounted) {
-                    setState(() => _imageFile = file);
-                  }
-                } catch (e) {
-                  if (mounted) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text('Lỗi khi crop ảnh: $e')),
+                    try {
+                      final file = await useCase();
+                      if (file != null && mounted) {
+                        setState(() => _imageFile = file);
+                      }
+                    } catch (e) {
+                      if (mounted) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(content: Text('Lỗi khi crop ảnh: $e')),
+                        );
+                      }
+                    }
+                  },
+                  icon: const Icon(Icons.camera_alt),
+                  label: const Text("Chụp ảnh"),
+                ),
+                ElevatedButton.icon(
+                  onPressed: () async {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (_) => const CameraPage()),
                     );
-                  }
-                }
-              },
-              icon: const Icon(Icons.camera_alt),
-              label: const Text("Chụp ảnh"),
+                  },
+                  icon: const Icon(Icons.stream_rounded),
+                  label: const Text("Live"),
+                ),
+              ],
             ),
 
             SizedBox(height: 10,),
