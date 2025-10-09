@@ -1,4 +1,5 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:google_mlkit_translation/google_mlkit_translation.dart';
 import 'package:learn_english/features/setting/presentation/bloc/setting_event.dart';
 import 'package:learn_english/features/setting/presentation/bloc/setting_state.dart';
 
@@ -7,19 +8,36 @@ import '../../../../services/app_storage/share_preferences.dart';
 
 class SettingsBloc extends Bloc<SettingsEvent, SettingsState> {
   final AppStorageService storage;
+  final modelManager = OnDeviceTranslatorModelManager();
 
   SettingsBloc(this.storage) : super(SettingsState.initial()) {
     // Load tất cả setting từ storage
     on<LoadSettings>((event, emit) async {
       final music = await storage.get<bool>(musicKey) ?? true;
-      print("music: $music");
       final volume = await storage.get<double>(volumeKey) ?? 0.5;
       final dark = await storage.get<bool>(darkModeKey) ?? false;
+      final language = await storage.get<String>(languageCode) ?? 'en';
+
+      final models = <LanguageModel>[];
+
+      for (final lang in listLanguage) {
+        final code = lang["code"]!;
+        final name = lang["label"]!;
+
+        bool downloaded = await modelManager.isModelDownloaded(code);
+        models.add(LanguageModel(
+          id: code,
+          name: name,
+          status: downloaded ? ModelStatus.downloaded : ModelStatus.notDownloaded,
+        ));
+      }
 
       emit(SettingsState(
+        languageCode: language,
         musicEnabled: music,
         volume: volume,
         darkMode: dark,
+        models: models,
       ));
     });
 
@@ -40,5 +58,41 @@ class SettingsBloc extends Bloc<SettingsEvent, SettingsState> {
       await storage.save(darkModeKey, event.enabled);
       emit(state.copyWith(darkMode: event.enabled));
     });
+
+    on<UpdateLanguage>((event, emit) async {
+      await storage.save(languageCode, event.languageCode);
+      emit(state.copyWith(languageCode: event.languageCode));
+    });
+
+    on<DownloadModel>(_onDownloadModel);
+  }
+
+  Future<void> _onDownloadModel(DownloadModel event, Emitter<SettingsState> emit) async {
+    final updated = state.models.map((m) {
+      if (m.id == event.languageCode) {
+        return m.copyWith(status: ModelStatus.downloading);
+      }
+      return m;
+    }).toList();
+    emit(state.copyWith(models: updated));
+
+    try {
+      await modelManager.downloadModel(event.languageCode);
+      final refreshed = state.models.map((m) {
+        if (m.id == event.languageCode) {
+          return m.copyWith(status: ModelStatus.downloaded);
+        }
+        return m;
+      }).toList();
+      emit(state.copyWith(models: refreshed));
+    } catch (e) {
+      final failed = state.models.map((m) {
+        if (m.id == event.languageCode) {
+          return m.copyWith(status: ModelStatus.notDownloaded);
+        }
+        return m;
+      }).toList();
+      emit(state.copyWith(models: failed));
+    }
   }
 }

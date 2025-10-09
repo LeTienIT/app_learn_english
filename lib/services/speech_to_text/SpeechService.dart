@@ -13,7 +13,7 @@ class SpeechToTextService {
     try {
       _available = await _speechToText.initialize(
         onStatus: (status) {
-          debugPrint("Speech status: $status");
+          // debugPrint("Speech status: $status");
           if (status == "done" || status == "notListening") {
             isMicActive.value = false;
             _speechToText.cancel();

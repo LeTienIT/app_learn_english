@@ -21,34 +21,28 @@ class LanguageTranslationService {
     }
 
     try {
-      // Bước 1: Nhận diện ngôn ngữ
       final String sourceLanguage = await _languageIdentifier.identifyLanguage(text);
 
       if (sourceLanguage.isEmpty) {
         return text;
       }
 
-      // Kiểm tra ngôn ngữ nguồn có hỗ trợ không
       final TranslateLanguage? sourceLang = _getTranslateLanguage(sourceLanguage);
       if (sourceLang == null) {
         return text;
       }
 
-      // Bước 2: Tải model nếu cần
       if (!await _modelManager.isModelDownloaded(sourceLang.bcpCode)) {
         return text;
       }
 
-      // Bước 3: Tạo translator
       final OnDeviceTranslator translator = OnDeviceTranslator(
         sourceLanguage: sourceLang,
         targetLanguage: TranslateLanguage.vietnamese,
       );
 
-      // Bước 4: Dịch văn bản
       final String translatedText = await translator.translateText(text);
 
-      // Giải phóng translator
       translator.close();
 
       return translatedText;

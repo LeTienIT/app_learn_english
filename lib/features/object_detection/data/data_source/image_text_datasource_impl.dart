@@ -24,7 +24,7 @@ class ImageTextDataSourceImpl implements ImageTextDataSource {
   }
 
   @override
-  Future<List<(String, String)>> processImageAndTranslate(File imageFile, String targetLanguage,String translationMode,) async {
+  Future<List<(String, String)>> processImageAndTranslate(File imageFile, String targetLanguage, String translationMode,) async {
     try {
       // Bước 1: Nhận diện văn bản từ ảnh
       final inputImage = InputImage.fromFile(imageFile);
@@ -44,19 +44,25 @@ class ImageTextDataSourceImpl implements ImageTextDataSource {
         throw Exception('Không nhận diện được văn bản từ ảnh.');
       }
 
-      // Bước 2: Dịch từng dòng
-      final translator = OnDeviceTranslator(
-        sourceLanguage: TranslateLanguage.english, // Giả định ngôn ngữ nguồn
-        targetLanguage: _mapStringToTranslateLanguage(targetLanguage),
-      );
+      final result = <(String, String)>[];
 
       final modelManager = OnDeviceTranslatorModelManager();
-      final isModelDownloaded = await modelManager.isModelDownloaded(targetLanguage);
-      if (!isModelDownloaded) {
-        await modelManager.downloadModel(targetLanguage, isWifiRequired: false);
+
+      if (!await modelManager.isModelDownloaded(TranslateLanguage.english.bcpCode)) {
+        await modelManager.downloadModel(TranslateLanguage.english.bcpCode, isWifiRequired: false);
       }
 
-      final result = <(String, String)>[];
+      final targetLang = _mapStringToTranslateLanguage(targetLanguage);
+      if (!await modelManager.isModelDownloaded(targetLang.bcpCode)) {
+        await modelManager.downloadModel(targetLang.bcpCode, isWifiRequired: false);
+      }
+
+      final translator = OnDeviceTranslator(
+        sourceLanguage: TranslateLanguage.english,
+        targetLanguage: targetLang,
+      );
+
+
       final languageIdentifier = LanguageIdentifier(confidenceThreshold: 0.5);
       if (translationMode == 'line') {
         // Translate by line (current behavior)

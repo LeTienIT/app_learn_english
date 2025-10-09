@@ -24,20 +24,20 @@ class _MenuShare extends State<MenuShare>{
           const Text("Menu", style: TextStyle(fontSize: 26, fontWeight: FontWeight.bold)),
           const Divider(height: 1),
           AnimatedMenuItem(
+            icon: Icons.camera_alt,
+            title: "Ống kính",
+            onTap: (){
+              di.sl<AudioPlayerService>().stopBackground();
+              Navigator.pushNamedAndRemoveUntil(context, '/imageObject',(router)=>false);
+            },
+          ),
+          AnimatedMenuItem(
             icon: Icons.menu_book,
             title: "Danh sách từ",
             onTap: () {
               di.sl<AudioPlayerService>().stopBackground();
               Navigator.pushNamedAndRemoveUntil(context, '/dictionary', (router) => false);
             },
-          ),
-          AnimatedMenuItem(
-            icon: Icons.camera_alt,
-            title: "Quét ảnh",
-            onTap: (){
-                di.sl<AudioPlayerService>().stopBackground();
-                Navigator.pushNamedAndRemoveUntil(context, '/imageObject',(router)=>false);
-              },
           ),
           AnimatedMenuItem(
             icon: Icons.assignment_outlined,
