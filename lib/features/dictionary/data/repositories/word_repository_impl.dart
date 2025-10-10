@@ -19,6 +19,7 @@ class WordRepositoryImpl implements WordRepository {
       vietnamese: word.vietnamese,
       example: word.example,
       favorite: word.favorite,
+      languageType: word.languageType,
     );
 
     final key = await localDataSource.addWord(wordData);
@@ -34,6 +35,7 @@ class WordRepositoryImpl implements WordRepository {
       vietnamese: data.vietnamese,
       example: data.example,
       favorite: data.favorite,
+      languageType: data.languageType,
     )).toList();
   }
 

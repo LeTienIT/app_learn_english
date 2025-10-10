@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:learn_english/features/dictionary/presentation/screens/widget/WordItem.dart';
+import 'package:learn_english/features/setting/presentation/bloc/setting_bloc.dart';
 import 'package:learn_english/features/shared/widget/menu.dart';
 
 import '../../../shared/widget/word_input_form.dart';
@@ -70,11 +71,13 @@ class _DictionaryViewState extends State<DictionaryView> {
                           context.read<WordBloc>().add(DeleteWordEvent(word));
                         },
                         onEdit: () {
+                          print("lang: ${word.languageType}");
                           showDialog(
                             context: context,
                             builder: (_) => AddWordDialog(
                               initialEnglish: word.english,
                               initialVietnamese: word.vietnamese,
+                              initLanguageType: word.languageType,
                               add: false,
                               onSave: (en, vi) {
                                 context.read<WordBloc>().add(UpdateWordEvent(
@@ -83,7 +86,8 @@ class _DictionaryViewState extends State<DictionaryView> {
                                       english: en,
                                       vietnamese: vi,
                                       example: word.example,
-                                      favorite: word.favorite
+                                      favorite: word.favorite,
+                                      languageType: word.languageType
                                   ),
                                 ));
                               },
@@ -91,6 +95,7 @@ class _DictionaryViewState extends State<DictionaryView> {
                           );
                         },
                         onToggleFavorite: () {
+                          print("lang: ${word.languageType}");
                           context.read<WordBloc>().add(UpdateWordEvent(
                             Word(
                               id: word.id,
@@ -98,6 +103,7 @@ class _DictionaryViewState extends State<DictionaryView> {
                               vietnamese: word.vietnamese,
                               example: word.example,
                               favorite: !word.favorite,
+                               languageType: word.languageType
                             ),
                           ));
                         },
@@ -122,11 +128,14 @@ class _DictionaryViewState extends State<DictionaryView> {
             context: context,
             builder: (_) => AddWordDialog(
               onSave: (en, vi) {
+                final settings = context.read<SettingsBloc>().state;
+                print("lang: ${settings.languageCode}");
                 context.read<WordBloc>().add(AddWordEvent(Word(
                   english: en,
                   vietnamese: vi,
                   example: '',
                   favorite: false,
+                  languageType: settings.languageCode
                 )));
               },
             ),

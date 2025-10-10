@@ -1,5 +1,7 @@
 import 'dart:io';
 
+import 'package:google_mlkit_text_recognition/google_mlkit_text_recognition.dart';
+
 import '../entities/TextTranslationResult.dart';
 import '../repository/ImageTextRepository.dart';
 
@@ -14,7 +16,7 @@ class ProcessImageAndTranslateUseCase {
   /// [targetLanguage]: Ngôn ngữ đích (ví dụ: 'vi' cho tiếng Việt).
   ///
   /// Trả về TextTranslationResult nếu thành công, hoặc throw Exception nếu thất bại.
-  Future<TextTranslationResult> call(File imageFile, String targetLanguage, String modeTranslation) async {
+  Future<TextTranslationResult> call(File imageFile, String targetLanguage, String modeTranslation, TextRecognitionScript script) async {
     // Validate input cơ bản
     if (!imageFile.existsSync()) {
       throw Exception('File ảnh không tồn tại.');
@@ -24,7 +26,7 @@ class ProcessImageAndTranslateUseCase {
     }
 
     // Gọi repository để xử lý
-    final result = await repository.processImageAndTranslate(imageFile, targetLanguage, modeTranslation);
+    final result = await repository.processImageAndTranslate(imageFile, targetLanguage, modeTranslation, script);
 
     // Business logic: Kiểm tra xem có dòng văn bản nào không
     if (result.lines.isEmpty) {

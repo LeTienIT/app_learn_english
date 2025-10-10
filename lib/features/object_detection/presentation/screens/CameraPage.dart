@@ -12,7 +12,9 @@ import 'package:learn_english/services/translation_text/LanguageTranslationServi
 import '../widget/TextOverlayPainter.dart';
 
 class CameraPage extends StatefulWidget {
-  const CameraPage({super.key});
+  final TextRecognitionScript script;
+  const CameraPage({super.key, required this.script});
+
 
   @override
   State<CameraPage> createState() => _CameraPageState();
@@ -38,7 +40,7 @@ class _CameraPageState extends State<CameraPage> {
   @override
   void initState() {
     super.initState();
-    textRecognizer = TextRecognizer(script: TextRecognitionScript.latin);
+    textRecognizer = TextRecognizer(script: widget.script);
     _initializeCamera();
   }
   @override

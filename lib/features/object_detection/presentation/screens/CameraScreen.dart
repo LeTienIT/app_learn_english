@@ -4,10 +4,12 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:learn_english/features/object_detection/presentation/bloc/image_translation_bloc.dart';
 import 'package:learn_english/features/object_detection/presentation/bloc/image_translation_state.dart';
 import 'package:learn_english/features/shared/widget/menu.dart';
+import '../../../../core/helper.dart';
 import '../../../dictionary/domain/entities/word.dart';
 import '../../../dictionary/presentation/bloc/word_bloc.dart';
 import '../../../dictionary/presentation/bloc/word_event.dart';
 import '../../../dictionary/presentation/bloc/word_state.dart';
+import '../../../setting/presentation/bloc/setting_bloc.dart';
 import '../../../shared/widget/word_input_form.dart';
 import '../../domain/use_case/PickAndCropImageUseCase.dart';
 import '../../domain/use_case/TextToSpeechUseCase.dart';
@@ -78,9 +80,11 @@ class _ObjectDetectionPageState extends State<ObjectDetectionPage> {
                 ),
                 ElevatedButton.icon(
                   onPressed: () async {
+                    final settings = context.read<SettingsBloc>().state;
+                    final script = textScript(settings.languageCode);
                     Navigator.push(
                       context,
-                      MaterialPageRoute(builder: (_) => const CameraPage()),
+                      MaterialPageRoute(builder: (_) => CameraPage(script: script,)),
                     );
                   },
                   icon: const Icon(Icons.stream_rounded),
@@ -122,14 +126,18 @@ class _ObjectDetectionPageState extends State<ObjectDetectionPage> {
                 ElevatedButton(
                     onPressed: (){
                       if (_imageFile != null) {
-                        context.read<ImageTranslationBloc>().add(TranslationEvent(File(_imageFile!.path), 'vi','line'),);
+                        final settings = context.read<SettingsBloc>().state; //TOANG Ở ĐÂY -> CHẠY ĐẾN ĐÂY LÀ TOANG LUÔN.
+                        // print("code ${settings.languageCode}");
+                        // print("script: ${textScript(settings.languageCode)}");
+                        context.read<ImageTranslationBloc>().add(TranslationEvent(File(_imageFile!.path), 'vi','line', textScript(settings.languageCode)),);
                       }
                     },
                     child: Text('Từng dòng')),
                 ElevatedButton(
                     onPressed: (){
                       if (_imageFile != null) {
-                        context.read<ImageTranslationBloc>().add(TranslationEvent(File(_imageFile!.path), 'vi','word'),);
+                        final settings = context.read<SettingsBloc>().state;
+                        context.read<ImageTranslationBloc>().add(TranslationEvent(File(_imageFile!.path), 'vi','word',textScript(settings.languageCode)),);
                       }
                     },
                     child: Text('Từng từ')),
@@ -138,6 +146,8 @@ class _ObjectDetectionPageState extends State<ObjectDetectionPage> {
             SizedBox(height: 10,),
             BlocBuilder<ImageTranslationBloc, ImageTranslationState>(
               builder: (context, state){
+                final settings = context.read<SettingsBloc>().state;
+                final language = textToCode(settings.languageCode);
                 if (state is ImageTranslationInitial) {
                   return const Center(child: Text('Chọn ảnh để bắt đầu'));
                 }
@@ -173,7 +183,7 @@ class _ObjectDetectionPageState extends State<ObjectDetectionPage> {
                               child: ListTile(
                                 contentPadding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
                                 title: Text(
-                                  'English: ${line.originalText}',
+                                  '$language: ${line.originalText}',
                                   style: const TextStyle(
                                     fontSize: 16,
                                     fontWeight: FontWeight.w600,
@@ -204,18 +214,19 @@ class _ObjectDetectionPageState extends State<ObjectDetectionPage> {
                                     IconButton(
                                       icon: const Icon(Icons.save, color: Colors.green),
                                       onPressed: () {
-                                        // _showAddWordDialog(context, english: line.originalText, vietnamese: line.translatedText, isEdit: false);
                                         showDialog(
                                           context: context,
                                           builder: (_) => AddWordDialog(
                                             initialEnglish: line.originalText,
                                             initialVietnamese: line.translatedText,
                                             onSave: (en, vi) {
+                                              final settings = context.read<SettingsBloc>().state;
                                               context.read<WordBloc>().add(AddWordEvent(Word(
                                                 english: en,
                                                 vietnamese: vi,
                                                 example: '',
                                                 favorite: false,
+                                                languageType: settings.languageCode
                                               )));
                                             },
                                           ),

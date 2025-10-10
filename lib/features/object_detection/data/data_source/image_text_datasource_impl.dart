@@ -2,6 +2,7 @@ import 'dart:io';
 import 'package:google_mlkit_language_id/google_mlkit_language_id.dart';
 import 'package:google_mlkit_text_recognition/google_mlkit_text_recognition.dart';
 import 'package:google_mlkit_translation/google_mlkit_translation.dart';
+import '../../../../services/translation_text/LanguageTranslationService.dart';
 import 'image_text_datasource.dart';
 
 class ImageTextDataSourceImpl implements ImageTextDataSource {
@@ -24,11 +25,11 @@ class ImageTextDataSourceImpl implements ImageTextDataSource {
   }
 
   @override
-  Future<List<(String, String)>> processImageAndTranslate(File imageFile, String targetLanguage, String translationMode,) async {
+  Future<List<(String, String)>> processImageAndTranslate(File imageFile, String targetLanguage, String translationMode, TextRecognitionScript script) async {
     try {
       // Bước 1: Nhận diện văn bản từ ảnh
       final inputImage = InputImage.fromFile(imageFile);
-      final textRecognizer = TextRecognizer(script: TextRecognitionScript.latin);
+      final textRecognizer = TextRecognizer(script: script);
       final RecognizedText recognizedText = await textRecognizer.processImage(inputImage);
 
       // Lấy danh sách các dòng văn bản
@@ -49,44 +50,39 @@ class ImageTextDataSourceImpl implements ImageTextDataSource {
       final modelManager = OnDeviceTranslatorModelManager();
 
       if (!await modelManager.isModelDownloaded(TranslateLanguage.english.bcpCode)) {
-        await modelManager.downloadModel(TranslateLanguage.english.bcpCode, isWifiRequired: false);
+        // await modelManager.downloadModel(TranslateLanguage.english.bcpCode, isWifiRequired: false);
+        return result;
       }
 
       final targetLang = _mapStringToTranslateLanguage(targetLanguage);
       if (!await modelManager.isModelDownloaded(targetLang.bcpCode)) {
-        await modelManager.downloadModel(targetLang.bcpCode, isWifiRequired: false);
+        // await modelManager.downloadModel(targetLang.bcpCode, isWifiRequired: false);
+        return result;
       }
-
-      final translator = OnDeviceTranslator(
-        sourceLanguage: TranslateLanguage.english,
-        targetLanguage: targetLang,
-      );
 
 
       final languageIdentifier = LanguageIdentifier(confidenceThreshold: 0.5);
       if (translationMode == 'line') {
-        // Translate by line (current behavior)
         for (var line in lines) {
           final detectedLanguage = await languageIdentifier.identifyLanguage(line);
           if(detectedLanguage!=targetLanguage){
-            final translatedText = await translator.translateText(line);
+            final translatedText = await LanguageTranslationService.translateToVietnamese(line);
             result.add((line, translatedText));
           }
         }
       } else {
         for (var line in lines) {
-          // Split line into words, handling multiple spaces and punctuation
           final words = line.split(RegExp(r'\s+')).where((word) => word.isNotEmpty).toList();
           for (var word in words) {
             final detectedLanguage = await languageIdentifier.identifyLanguage(word);
             if(detectedLanguage!=targetLanguage){
-              final translatedText = await translator.translateText(word);
+              final translatedText = await LanguageTranslationService.translateToVietnamese(word);
               result.add((word, translatedText));
             }
           }
         }
       }
-      translator.close();
+      LanguageTranslationService.dispose();
 
       return result;
     } catch (e) {

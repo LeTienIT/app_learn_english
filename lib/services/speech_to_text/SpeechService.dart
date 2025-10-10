@@ -33,21 +33,27 @@ class SpeechToTextService {
     }
   }
 
-  Future<void> startListening({required Function(String text) onResult, bool partialResults = true,}) async {
+  Future<void> startListening({required Function(String text) onResult, bool partialResults = true, required String languageCode,}) async {
     if (!_available) return;
+
     final locales = await _speechToText.locales();
-    final enLocale = locales.firstWhere(
-          (l) => l.localeId == "en-US",
-      orElse: () => locales.firstWhere((l) => l.localeId.startsWith("en")),
+
+    // ánh xạ từ languageCode -> localeId phù hợp trong danh sách hệ thống
+    final locale = locales.firstWhere(
+          (l) =>
+      l.localeId.toLowerCase().startsWith(languageCode.toLowerCase()) ||
+          l.name.toLowerCase().contains(languageCode.toLowerCase()),
+      orElse: () => locales.first, // fallback
     );
+
     await _speechToText.listen(
-      localeId: enLocale.localeId,
+      localeId: locale.localeId,
       listenOptions: SpeechListenOptions(
         listenMode: ListenMode.dictation,
-        partialResults: true,
+        partialResults: partialResults,
       ),
       onResult: (result) {
-        if(result.finalResult){
+        if (result.finalResult) {
           onResult(result.recognizedWords);
         }
       },

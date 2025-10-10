@@ -1,4 +1,6 @@
 import 'dart:io';
+import 'package:google_mlkit_text_recognition/google_mlkit_text_recognition.dart' hide TextLine;
+
 import '../../domain/entities/TextTranslationResult.dart';
 import '../../domain/repository/ImageTextRepository.dart';
 import '../data_source/image_text_datasource.dart';
@@ -9,13 +11,14 @@ class ImageTextRepositoryImpl implements ImageTextRepository {
   ImageTextRepositoryImpl(this.dataSource);
 
   @override
-  Future<TextTranslationResult> processImageAndTranslate(File imageFile, String targetLanguage,String modeTranslation) async {
+  Future<TextTranslationResult> processImageAndTranslate(File imageFile, String targetLanguage,String modeTranslation, TextRecognitionScript script) async {
     try {
       // Gọi DataSource để nhận diện và dịch
       final lineResults = await dataSource.processImageAndTranslate(
         imageFile,
         targetLanguage,
-          modeTranslation,
+        modeTranslation,
+        script
       );
 
       // Ánh xạ kết quả thành danh sách TextLine

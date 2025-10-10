@@ -17,7 +17,8 @@ class ImageTranslationBloc extends Bloc<ImageTranslationEvent, ImageTranslationS
       final TextTranslationResult result = await imageAndTranslateUseCase.call(
         event.imagePath,
         event.language,
-        event.modeTranslation
+        event.modeTranslation,
+        event.script
       );
       emit(ImageTranslationSuccess(result));
     } catch (e) {

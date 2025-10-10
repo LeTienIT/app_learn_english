@@ -21,13 +21,14 @@ class WordDataAdapter extends TypeAdapter<WordData> {
       vietnamese: fields[1] as String,
       example: fields[2] as String?,
       favorite: fields[3] as bool,
+      languageType: fields[4] as String?,
     );
   }
 
   @override
   void write(BinaryWriter writer, WordData obj) {
     writer
-      ..writeByte(4)
+      ..writeByte(5)
       ..writeByte(0)
       ..write(obj.english)
       ..writeByte(1)
@@ -35,7 +36,9 @@ class WordDataAdapter extends TypeAdapter<WordData> {
       ..writeByte(2)
       ..write(obj.example)
       ..writeByte(3)
-      ..write(obj.favorite);
+      ..write(obj.favorite)
+      ..writeByte(4)
+      ..write(obj.languageType);
   }
 
   @override

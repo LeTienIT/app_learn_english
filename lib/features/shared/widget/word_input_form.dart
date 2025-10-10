@@ -1,14 +1,21 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:learn_english/features/setting/presentation/bloc/setting_bloc.dart';
+
+import '../../../core/helper.dart';
 
 class AddWordDialog extends StatefulWidget {
   final String initialEnglish;
   final String initialVietnamese;
+  final String? initLanguageType;
   final void Function(String english, String vietnamese) onSave;
   final bool add;
+
   const AddWordDialog({
     super.key,
     this.initialEnglish = '',
     this.initialVietnamese = '',
+    this.initLanguageType,
     required this.onSave,
     this.add = true
   });
@@ -20,6 +27,7 @@ class AddWordDialog extends StatefulWidget {
 class _AddWordDialogState extends State<AddWordDialog> {
   late TextEditingController englishController;
   late TextEditingController vietnameseController;
+  late TextEditingController languageType;
 
   @override
   void initState() {
@@ -37,6 +45,16 @@ class _AddWordDialogState extends State<AddWordDialog> {
 
   @override
   Widget build(BuildContext context) {
+    final settings = context.read<SettingsBloc>().state;
+    String langType = '';
+    if(widget.initLanguageType!=null){
+      langType = textToCode(widget.initLanguageType!);
+      languageType = TextEditingController(text: 'Tiếng: $langType');
+    }
+    else{
+      langType = textToCode(settings.languageCode);
+      languageType = TextEditingController(text: 'Tiếng: $langType');
+    }
     return AlertDialog(
       title: Text(widget.add ? "Thêm từ mới" : "Chỉnh sửa"),
       content: Column(
@@ -44,11 +62,16 @@ class _AddWordDialogState extends State<AddWordDialog> {
         children: [
           TextField(
             controller: englishController,
-            decoration: const InputDecoration(labelText: "English"),
+            decoration: InputDecoration(labelText: 'Tiếng $langType'),
           ),
           TextField(
             controller: vietnameseController,
-            decoration: const InputDecoration(labelText: "Vietnamese"),
+            decoration: const InputDecoration(labelText: "Tiếng Việt"),
+          ),
+          TextField(
+            controller: languageType,
+            decoration: const InputDecoration(labelText: "Loại"),
+            readOnly: true,
           ),
         ],
       ),

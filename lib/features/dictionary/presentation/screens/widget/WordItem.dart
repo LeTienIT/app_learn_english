@@ -1,11 +1,15 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:learn_english/core/helper.dart';
 import 'package:lottie/lottie.dart';
 
+import '../../../../../core/constants.dart';
 import '../../../../../injection/injection.dart' as di;
 import '../../../../../services/speech_to_text/SpeechService.dart';
 import '../../../../object_detection/domain/use_case/TextToSpeechUseCase.dart';
+import '../../../../setting/presentation/bloc/setting_bloc.dart';
 import '../../../domain/entities/word.dart';
 
 class WordItem extends StatelessWidget {
@@ -24,7 +28,7 @@ class WordItem extends StatelessWidget {
     this.onToggleFavorite,
   });
 
-  Future<void> _showListeningDialog(BuildContext context, String target) async {
+  Future<void> _showListeningDialog(BuildContext context, String target, String langCode) async {
     String recognizedText = '';
     bool isListening = true;
     bool success = false;
@@ -34,7 +38,9 @@ class WordItem extends StatelessWidget {
       builder: (context) {
         return StatefulBuilder(
           builder: (context, setState) {
+            final settings = context.read<SettingsBloc>().state;
             di.sl<SpeechToTextService>().startListening(
+              languageCode: settings.languageCode,
               onResult: (text) {
                 setState(() {
                   recognizedText = text;
@@ -48,7 +54,7 @@ class WordItem extends StatelessWidget {
 
             // UI của dialog
             return AlertDialog(
-              title: success ? const Text("Hoàn thành") : const Text("Đang lắng nghe..."),
+              title: success ? const Text("Hoàn thành") : Text("Tiếng ${textToCode(langCode)} ..."),
               content: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
@@ -145,7 +151,8 @@ class WordItem extends StatelessWidget {
                   icon: const Icon(Icons.mic, color: Colors.red),
                   onPressed: () {
                     if(di.sl<SpeechToTextService>().available){
-                      _showListeningDialog(context,word.english);
+                      print("code doc: ${word.languageType}");
+                      _showListeningDialog(context,word.english, word.languageType!);
                     }
                     else{
                       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Ứng dụng không hỗ trợ lấy âm thanh"),backgroundColor: Colors.redAccent,));

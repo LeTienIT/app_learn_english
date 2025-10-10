@@ -4,7 +4,10 @@ import 'package:learn_english/features/setting/presentation/bloc/setting_event.d
 import 'package:learn_english/features/setting/presentation/bloc/setting_state.dart';
 
 import '../../../../core/constants.dart';
+import '../../../../core/helper.dart';
+import '../../../../injection/injection.dart';
 import '../../../../services/app_storage/share_preferences.dart';
+import '../../../../services/tts/FlutterTtsService.dart';
 
 class SettingsBloc extends Bloc<SettingsEvent, SettingsState> {
   final AppStorageService storage;
@@ -62,6 +65,10 @@ class SettingsBloc extends Bloc<SettingsEvent, SettingsState> {
     on<UpdateLanguage>((event, emit) async {
       await storage.save(languageCode, event.languageCode);
       emit(state.copyWith(languageCode: event.languageCode));
+
+      final tts = sl<FlutterTtsService>();
+      final locale = mapLanguageToLocale(event.languageCode);
+      await tts.setLanguage(locale);
     });
 
     on<DownloadModel>(_onDownloadModel);

@@ -2,7 +2,8 @@ import '../../domain/entities/word.dart';
 
 abstract class WordEvent{}
 
-class LoadWords extends WordEvent {}
+class LoadWords extends WordEvent {
+}
 
 class AddWordEvent extends WordEvent {
   final Word word;

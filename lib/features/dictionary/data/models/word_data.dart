@@ -16,5 +16,8 @@ class WordData extends HiveObject{
   @HiveField(3)
   bool favorite;
 
-  WordData({required this.english, required this.vietnamese, this.example, this.favorite=false});
+  @HiveField(4)
+  String languageType;
+
+  WordData({required this.english, required this.vietnamese, this.example, this.favorite=false, String? languageType}): languageType = languageType ?? "en-vi";
 }

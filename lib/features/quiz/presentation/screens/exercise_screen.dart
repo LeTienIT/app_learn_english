@@ -5,6 +5,7 @@ import 'package:lottie/lottie.dart';
 import '../../../../injection/injection.dart' as di;
 import '../../../../services/speech_to_text/SpeechService.dart';
 import '../../../object_detection/domain/use_case/TextToSpeechUseCase.dart';
+import '../../../setting/presentation/bloc/setting_bloc.dart';
 import '../../domain/entities/quiz_question.dart';
 import '../bloc/quiz_bloc.dart';
 import '../bloc/quiz_event.dart';
@@ -169,7 +170,9 @@ class _ExerciseScreenState extends State<ExerciseScreen> {
                                   if (isActive) {
                                     di.sl<SpeechToTextService>().stopListening();
                                   } else {
+                                    final settings = context.read<SettingsBloc>().state;
                                     di.sl<SpeechToTextService>().startListening(
+                                      languageCode: settings.languageCode,
                                       onResult: (text) {
                                         setState(() {
                                           recognizedText = text;

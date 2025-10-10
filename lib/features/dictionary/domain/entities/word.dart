@@ -4,6 +4,6 @@ class Word {
   String vietnamese;
   String? example;
   bool favorite;
-
-  Word({this.id,required this.english, required this.vietnamese, this.example, this.favorite=false});
+  String? languageType;
+  Word({this.id,required this.english, required this.vietnamese, this.example, this.favorite=false, this.languageType = "en-vi",});
 }
