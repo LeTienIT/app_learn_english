@@ -6,7 +6,7 @@ class GetAllWords {
 
   GetAllWords(this.repository);
 
-  Future<List<Word>> call() async {
-    return repository.getAllWords();
+  Future<List<Word>> call({String? languageType}) async {
+    return repository.getAllWords(languageType: languageType);
   }
 }

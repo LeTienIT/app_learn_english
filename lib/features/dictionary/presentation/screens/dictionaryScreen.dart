@@ -4,6 +4,7 @@ import 'package:learn_english/features/dictionary/presentation/screens/widget/Wo
 import 'package:learn_english/features/setting/presentation/bloc/setting_bloc.dart';
 import 'package:learn_english/features/shared/widget/menu.dart';
 
+import '../../../../injection/injection.dart' as di;
 import '../../../shared/widget/word_input_form.dart';
 import '../../domain/entities/word.dart';
 import '../bloc/word_bloc.dart';
@@ -19,6 +20,12 @@ class DictionaryView extends StatefulWidget {
 
 class _DictionaryViewState extends State<DictionaryView> {
   String query = "";
+  
+  @override
+  void initState() {
+    super.initState();
+    context.read<WordBloc>().add(LoadWords());
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -71,7 +78,6 @@ class _DictionaryViewState extends State<DictionaryView> {
                           context.read<WordBloc>().add(DeleteWordEvent(word));
                         },
                         onEdit: () {
-                          print("lang: ${word.languageType}");
                           showDialog(
                             context: context,
                             builder: (_) => AddWordDialog(
@@ -95,7 +101,6 @@ class _DictionaryViewState extends State<DictionaryView> {
                           );
                         },
                         onToggleFavorite: () {
-                          print("lang: ${word.languageType}");
                           context.read<WordBloc>().add(UpdateWordEvent(
                             Word(
                               id: word.id,
@@ -129,7 +134,6 @@ class _DictionaryViewState extends State<DictionaryView> {
             builder: (_) => AddWordDialog(
               onSave: (en, vi) {
                 final settings = context.read<SettingsBloc>().state;
-                print("lang: ${settings.languageCode}");
                 context.read<WordBloc>().add(AddWordEvent(Word(
                   english: en,
                   vietnamese: vi,

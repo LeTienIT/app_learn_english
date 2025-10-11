@@ -10,7 +10,7 @@ class WordRepositoryImpl implements WordRepository {
   @override
   Future<int> addWord(Word word) async {
     final list = await localDataSource.getAllWords();
-    final exists = list.any((w) => w.english.toLowerCase() == word.english.toLowerCase());
+    final exists = list.any((w) => w.english.toLowerCase() == word.english.toLowerCase() && w.languageType == word.languageType);
     if (exists) {
       return -1;
     }
@@ -27,8 +27,8 @@ class WordRepositoryImpl implements WordRepository {
   }
 
   @override
-  Future<List<Word>> getAllWords() async {
-    final list = await localDataSource.getAllWords();
+  Future<List<Word>> getAllWords({String? languageType}) async {
+    final list = await localDataSource.getAllWords(languageType: languageType);
     return list.map((data) => Word(
       id: data.key as int?,
       english: data.english,

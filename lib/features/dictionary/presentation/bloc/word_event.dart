@@ -3,6 +3,8 @@ import '../../domain/entities/word.dart';
 abstract class WordEvent{}
 
 class LoadWords extends WordEvent {
+  final String? languageType;
+  LoadWords({this.languageType});
 }
 
 class AddWordEvent extends WordEvent {

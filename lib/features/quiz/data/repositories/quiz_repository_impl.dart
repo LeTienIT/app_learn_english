@@ -1,7 +1,9 @@
 import 'dart:math';
 
+import '../../../../injection/injection.dart' as di;
 import '../../../dictionary/domain/entities/word.dart';
 import '../../../dictionary/domain/use_case/get_all_word.dart';
+import '../../../setting/presentation/bloc/setting_bloc.dart';
 import '../../domain/entities/quiz_question.dart';
 import '../../domain/repositories/quiz_repository.dart';
 
@@ -13,7 +15,8 @@ class QuizRepositoryImpl implements QuizRepository {
 
   @override
   Future<List<QuizQuestion>> generateQuiz({int numberOfQuestions = 10, String typeQ = "all"}) async {
-    final listWord = await getAllWords.call();
+    final settings = di.sl<SettingsBloc>().state;
+    final listWord = await getAllWords.call(languageType: settings.languageCode);
     listWord.shuffle();
     final selected = listWord.take(numberOfQuestions).toList();
     return selected.map((word) {

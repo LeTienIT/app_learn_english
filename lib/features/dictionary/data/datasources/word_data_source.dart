@@ -3,7 +3,7 @@ import '../models/word_data.dart';
 
 abstract class WordLocalDataSource {
   Future<int> addWord(WordData word);
-  Future<List<WordData>> getAllWords();
+  Future<List<WordData>> getAllWords({String? languageType});
   Future<void> updateWord(int key, WordData word);
   Future<void> deleteWord(int key);
 }
@@ -19,8 +19,11 @@ class WordLocalDataSourceImpl implements WordLocalDataSource {
   }
 
   @override
-  Future<List<WordData>> getAllWords() async {
-    return box.values.toList();
+  Future<List<WordData>> getAllWords({String? languageType}) async {
+    print("lang code $languageType");
+    final all = box.values.toList();
+    if (languageType == null) return all;
+    return all.where((e) => e.languageType == languageType).toList();
   }
 
   @override

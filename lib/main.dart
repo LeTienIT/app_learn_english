@@ -35,15 +35,16 @@ void main() async{
       providers: [
         BlocProvider(create: (_) => di.sl<ObjectDetectionBloc>()),
         BlocProvider(create: (_) => di.sl<ImageTranslationBloc>()),
+        BlocProvider(create: (_) => di.sl<QuizBloc>()),
+        BlocProvider(create: (_) => di.sl<QuizBloc>()),
+        BlocProvider(create: (_) => di.sl<SettingsBloc>()),
         BlocProvider(create: (_) => WordBloc(
           addWord: di.sl<AddWord>(),
           getAllWords: di.sl<GetAllWords>(),
           updateWord: di.sl<UpdateWord>(),
           deleteWord: di.sl<DeleteWord>(),
-        )..add(LoadWords())),
-        BlocProvider(create: (_) => di.sl<QuizBloc>()),
-        BlocProvider(create: (_) => di.sl<QuizBloc>()),
-        BlocProvider(create: (_) => di.sl<SettingsBloc>()),
+          settingsBloc: di.sl<SettingsBloc>()
+        )),
       ],
       child: MaterialApp(
         initialRoute: '/imageObject',
